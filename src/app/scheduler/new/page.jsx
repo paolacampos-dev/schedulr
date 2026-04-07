@@ -31,7 +31,6 @@ export default async function NewEvent({ searchParams})  {
             action={handleSubmit}
             initialDate= {initialDate}
         />
-
     )
 }
 
