@@ -2,20 +2,36 @@ import { db } from "@/utils/dbConnection";
 import Link from "next/link";
 import { formatDateForDisplay } from "@/utils/dateHelpers";
 
+
 export default async function Scheduler({ searchParams }) {
     const userId = "test-user";
-    const view = searchParams?.view || "month";
-    
+
     const today = new Date()
-    const year = today.getFullYear()
-    const month = today.getMonth()
-    const daysInMonth = new Date(year, month + 1, 0).getDate()
-    const firstDayOfMonth = new Date(year, month, 1).getDay()
-    const days = Array.from({ length: daysInMonth }, (_, i) => i + 1)
+
+    const params = await searchParams
+    const view = params?.view || "month";
+
+    const year = params?.year ? Number(params.year) : today.getFullYear()
+    const month = params?.month ? Number(params.month) : today.getMonth()
+
+    let currentMonth = month
+    let currentYear = year
+    if (currentMonth < 0) {
+        currentMonth = 11
+        currentYear -= 1
+    }
+    if (currentMonth > 11) {
+        currentMonth = 0
+        currentYear += 1
+    }
+    
+    const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate()
+    const firstDayOfMonth = new Date(currentYear, currentMonth, 1).getDay()
     const startOffset = firstDayOfMonth === 0 ? 6 : firstDayOfMonth - 1
+    const days = Array.from({ length: daysInMonth }, (_, i) => i + 1)
     const emptyDays = Array.from({ length: startOffset })
     const weekDays = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
-    
+    const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]
 
     const eventsResult = await db.query(
         `
@@ -31,12 +47,6 @@ export default async function Scheduler({ searchParams }) {
 
     return (
         <div>
-            <div>
-                <Link href="/scheduler?view=month">Month</Link>
-                <Link href="/scheduler?view=list">List</Link>
-                <Link href="/scheduler/new">+ New Event</Link>
-            </div>
-
             {view === "list" ? (
                 <div>
                     <h1>Events</h1>
@@ -61,61 +71,104 @@ export default async function Scheduler({ searchParams }) {
                 </div>
             ) : (
                 <div>
-                    <h1>Month View</h1>
-                    <div className="calendar-grid">
-                        {weekDays.map((dayName) => (
-                            <div key={dayName} className="calendar-weekday">
-                                {dayName}
-                            </div>
-                        ))}
+                    <div className="calendar-nav">
+                        <Link href={`/scheduler?view=month&month=${currentMonth - 1}&year=${currentYear}`}>
+                            ←
+                        </Link>
+                        <h1>{months[currentMonth]} {currentYear}</h1>
+                        <Link href={`/scheduler?view=month&month=${currentMonth + 1}&year=${currentYear}`}>
+                            →
+                        </Link>
+                    </div>
+                    <hr></hr>
+                    <div className="calendar-wrapper">
+                        <div className="calendar-grid">
+                            {weekDays.map((dayName, index) => {
+                                const isSaturday = index === 5 
+                                const isSunday = index === 6
 
-                        {emptyDays.map((_, index) => (
-                            <div key={`empty-${index}`} className="calendar-empty"></div>
-                        ))}
+                                return (
+                                    <div
+                                        key={dayName}
+                                        className={`calendar-weekday ${isSaturday ? "saturday-label" : ""} ${isSunday ? "sunday-label" : ""}`}
+                                    >
+                                        {dayName}
+                                    </div>
+                                )
+                            })}
 
-                        {days.map((day) => {
-                            const dateString = `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`
+                            {emptyDays.map((_, index) => (
+                                <div key={`empty-${index}`} className="calendar-empty"></div>
+                            ))}
 
-                            const dayEvents = events.filter((event) => {
-                            const eventDate = new Date(event.event_date).toISOString().split("T")[0]
-                            return eventDate === dateString
-                            }
-                        )
+                            {days.map((day, index) => {
+                                const dateString = `${currentYear}-${String(currentMonth + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`
 
-                            return (
-                                <Link 
-                                    href={`/scheduler/day/${dateString}`}
-                                    key={day} 
-                                    className="calendar-day"
-                                >
-                                    <strong>{day}</strong>
-                                    {dayEvents.map((event) => {
-                                        const start = event.start_time
-                                            ? String(event.start_time).slice(0, 5)
-                                            : ""
+                                const isToday =
+                                    day === today.getDate() &&
+                                    currentMonth === today.getMonth() &&
+                                    currentYear === today.getFullYear()
 
-                                        const end = event.end_time
-                                            ? String(event.end_time).slice(0, 5)
-                                            : ""
+                                const dayEvents = events.filter((event) => {
+                                const eventDate = new Date(event.event_date).toISOString().split("T")[0]
+                                return eventDate === dateString
+                            })
+                        
+                            const visibleEvents = dayEvents.slice(0, 2)
 
-                                        const timeRange =
-                                            start && end
-                                            ? `${start}-${end}`
-                                            : start || "" 
-    
-                                        return (
-                                            <p key={event.id} className="calendar-event">
-                                                {timeRange && (
-                                                <span className="event-time">{timeRange}</span>
-                                                )}{" "}
-                                                {event.title}
-                                            </p>
-                                        )
-                                    })}
-                                    
-                                </Link>
-                            )
-                        })}
+                            const gridIndex = index + startOffset
+                            const isSaturday = gridIndex % 7 === 5
+                            const isSunday = gridIndex % 7 === 6
+                            const isWeekend = isSaturday || isSunday
+                            const isWeekday = !isWeekend
+
+                                return (
+                                    <Link 
+                                        href={`/scheduler/day/${dateString}`}
+                                        key={day} 
+                                        className={`calendar-day ${isToday ? "today" : ""} ${isWeekday ? "weekday" : ""} ${isSaturday ? "saturday" : ""} ${isSunday ? "sunday" : ""}`}
+                                    >
+                                        <strong>{day}</strong>
+
+                                        <div className="calendar-events-text">
+                                            {visibleEvents.map((event) => {
+                                                const start = event.start_time
+                                                    ? String(event.start_time).slice(0, 5)
+                                                    : ""
+
+                                                const end = event.end_time
+                                                    ? String(event.end_time).slice(0, 5)
+                                                    : ""
+
+                                                const timeRange =
+                                                    start && end
+                                                    ? `${start}-${end}`
+                                                    : start || ""
+
+                                                return (
+                                                    <p key={event.id} className="calendar-event">
+                                                        {timeRange && (
+                                                            <span className="event-time">{timeRange}</span>
+                                                        )}{" "}
+                                                        {event.title}
+                                                    </p>
+                                                )
+                                            })}
+                                        </div>
+
+                                        <div className="calendar-events-dots">
+                                            {visibleEvents.map((event) => (
+                                                <span key={event.id} className="event-dot"></span>
+                                            ))}
+                                        </div>
+
+                                            {dayEvents.length > 2 && (
+                                                <p className="more-events">+{dayEvents.length - 2} more</p>
+                                            )}
+                                    </Link>
+                                )
+                            })}
+                        </div>
                     </div>
                 </div>
             )}
