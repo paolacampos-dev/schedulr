@@ -1,10 +1,10 @@
 "use client"
 
 import Link from "next/link";
-import { useSearchParams } from "next/navigation"
+//import { useSearchParams } from "next/navigation"
 
 export default function Header()  {
-    const searchParams = useSearchParams()
+    //const searchParams = useSearchParams()
     const view = searchParams.get("view") || "month"
 
     return(
