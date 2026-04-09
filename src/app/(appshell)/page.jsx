@@ -46,37 +46,51 @@ export default async function Scheduler({ searchParams }) {
     const events = eventsResult.rows;
 
     return (
-        <div>
-            {view === "list" ? (
-                <div>
-                    <h1>Events</h1>
 
-                    {events.length === 0 ? (
-                        <p>No events yet</p>
-                    ) : (
-                        <ul>
+        <div>
+            {view === "list"  ? (
+        <div className="page-container">
+                {events.length === 0 ? (
+                    <p>No events yet</p>
+                ) : (
+                    <div className="events-card">
+                        <h1 className="events-heading">Events</h1>
+                        <ul className="events-list">
                             {events.map((event) => (
-                                <li key={event.id}>
-                                    <Link href={`/scheduler/new?date=${event.event_date}`}>
-                                        <h3>{event.title}</h3>
-                                        <p>{formatDateForDisplay(event.event_date)}</p>
-                                        <p>{event.start_time ? String(event.start_time) : ""}</p>
-                                        <p>{event.end_time ? String(event.end_time) : ""}</p>
-                                        <p>{event.description}</p>
+                                <li key={event.id} className="event-item">
+                                    <Link href={`/new?date=${event.event_date}`} className="event-row">
+                                        <h3 className="event-title">{event.title}</h3>
+                                        <p className="event-date">
+                                            {formatDateForDisplay(event.event_date)}
+                                        </p>
+                                        <div className="event-time">
+                                            {event.start_time && <span>{String(event.start_time)}</span>}
+                                            {event.end_time && <span> - {String(event.end_time)}</span>}
+                                        </div>
+                                        {event.description && (
+                                            <p className="event-description">{event.description}</p>
+                                        )}
                                     </Link>
                                 </li>
                             ))}
                         </ul>
-                    )}
-                </div>
-            ) : (
+                    </div>
+                )}
+        </div>
+    ) : (
                 <div>
                     <div className="calendar-nav">
-                        <Link href={`/scheduler?view=month&month=${currentMonth - 1}&year=${currentYear}`}>
+                        <Link 
+                            href={`/?view=month&month=${currentMonth - 1}&year=${currentYear}`}
+                            className="nav-arrow"
+                        >
                             ←
                         </Link>
                         <h1>{months[currentMonth]} {currentYear}</h1>
-                        <Link href={`/scheduler?view=month&month=${currentMonth + 1}&year=${currentYear}`}>
+                        <Link 
+                            href={`/?view=month&month=${currentMonth + 1}&year=${currentYear}`}
+                            className="nav-arrow"
+                        >
                             →
                         </Link>
                     </div>
@@ -124,7 +138,7 @@ export default async function Scheduler({ searchParams }) {
 
                                 return (
                                     <Link 
-                                        href={`/scheduler/day/${dateString}`}
+                                        href={`/day/${dateString}`}
                                         key={day} 
                                         className={`calendar-day ${isToday ? "today" : ""} ${isWeekday ? "weekday" : ""} ${isSaturday ? "saturday" : ""} ${isSunday ? "sunday" : ""}`}
                                     >

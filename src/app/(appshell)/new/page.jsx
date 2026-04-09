@@ -22,8 +22,8 @@ export default async function NewEvent({ searchParams})  {
         VALUES ($1, $2, $3, $4, $5, $6)`,
         [ userId, eventDate, title, startTime, endTime, description]
     )
-    revalidatePath("/scheduler")
-    redirect("/scheduler")
+    revalidatePath("/")
+    redirect("/")
     }
 
     return(
