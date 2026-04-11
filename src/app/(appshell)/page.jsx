@@ -4,7 +4,7 @@ import { formatDateForDisplay } from "@/utils/dateHelpers";
 
 
 export default async function Scheduler({ searchParams }) {
-    const userId = "test-user";
+  
 
     const today = new Date()
 
@@ -37,10 +37,8 @@ export default async function Scheduler({ searchParams }) {
         `
         SELECT *
         FROM calendar_events
-        WHERE user_id = $1
         ORDER BY event_date ASC, start_time ASC
         `,
-        [userId]
     );
 
     const events = eventsResult.rows;
@@ -58,7 +56,7 @@ export default async function Scheduler({ searchParams }) {
                         <ul className="events-list">
                             {events.map((event) => (
                                 <li key={event.id} className="event-item">
-                                    <Link href={`/new?date=${event.event_date}`} className="event-row">
+                                    <Link href={`/event/${event.id}`} className="event-row">
                                         <h3 className="event-title">{event.title}</h3>
                                         <p className="event-date">
                                             {formatDateForDisplay(event.event_date)}
@@ -124,9 +122,13 @@ export default async function Scheduler({ searchParams }) {
                                     currentYear === today.getFullYear()
 
                                 const dayEvents = events.filter((event) => {
-                                const eventDate = new Date(event.event_date).toISOString().split("T")[0]
-                                return eventDate === dateString
-                            })
+                                    const eventDate = event.event_date
+                                    const eventDateString = `${eventDate.getFullYear()}-${String(
+                                        eventDate.getMonth() + 1
+                                        ).padStart(2, "0")}-${String(eventDate.getDate()).padStart(2, "0")}`
+
+                                        return eventDateString === dateString
+                                    })
                         
                             const visibleEvents = dayEvents.slice(0, 2)
 
