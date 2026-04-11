@@ -5,8 +5,8 @@ import EventForm from "@/components/EventForm";
 
 export default async function NewEvent({ searchParams})  {
     const userId = "test-user"
-    const resolvedParams = await searchParams
-    const initialDate = resolvedParams?.date || ""
+    const params = await searchParams
+    const initialDate = params?.date || ""
 
     async function handleSubmit(rawFormData)    {
         "use server"   
