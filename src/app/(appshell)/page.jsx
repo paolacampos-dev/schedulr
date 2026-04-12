@@ -1,19 +1,17 @@
 import { db } from "@/utils/dbConnection";
 import Link from "next/link";
-import { formatDateForDisplay } from "@/utils/dateHelpers";
+import { buildDateString, formatDateForComparison, formatDateForDisplay } from "@/utils/dateHelpers";
+import EventCard from "@/components/EventCard";
 
 
 export default async function Scheduler({ searchParams }) {
-  
 
     const today = new Date()
-
     const params = await searchParams
     const view = params?.view || "month";
-
     const year = params?.year ? Number(params.year) : today.getFullYear()
     const month = params?.month ? Number(params.month) : today.getMonth()
-
+    
     let currentMonth = month
     let currentYear = year
     if (currentMonth < 0) {
@@ -40,42 +38,26 @@ export default async function Scheduler({ searchParams }) {
         ORDER BY event_date ASC, start_time ASC
         `,
     );
-
     const events = eventsResult.rows;
 
     return (
-
         <div>
             {view === "list"  ? (
-        <div className="page-container">
+            <div className="page-container">
                 {events.length === 0 ? (
                     <p>No events yet</p>
                 ) : (
                     <div className="events-card">
                         <h1 className="events-heading">Events</h1>
-                        <ul className="events-list">
-                            {events.map((event) => (
-                                <li key={event.id} className="event-item">
-                                    <Link href={`/event/${event.id}`} className="event-row">
-                                        <h3 className="event-title">{event.title}</h3>
-                                        <p className="event-date">
-                                            {formatDateForDisplay(event.event_date)}
-                                        </p>
-                                        <div className="event-time">
-                                            {event.start_time && <span>{String(event.start_time)}</span>}
-                                            {event.end_time && <span> - {String(event.end_time)}</span>}
-                                        </div>
-                                        {event.description && (
-                                            <p className="event-description">{event.description}</p>
-                                        )}
-                                    </Link>
-                                </li>
+                        <div className="events-list">
+                            {events.map((event) => ( 
+                                <EventCard key={event.id} event={event}/>
                             ))}
-                        </ul>
+                        </div>
                     </div>
                 )}
-        </div>
-    ) : (
+            </div>
+            ) : (
                 <div>
                     <div className="calendar-nav">
                         <Link 
@@ -93,12 +75,13 @@ export default async function Scheduler({ searchParams }) {
                         </Link>
                     </div>
                     <hr></hr>
+
                     <div className="calendar-wrapper">
                         <div className="calendar-grid">
+
                             {weekDays.map((dayName, index) => {
                                 const isSaturday = index === 5 
                                 const isSunday = index === 6
-
                                 return (
                                     <div
                                         key={dayName}
@@ -114,29 +97,23 @@ export default async function Scheduler({ searchParams }) {
                             ))}
 
                             {days.map((day, index) => {
-                                const dateString = `${currentYear}-${String(currentMonth + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`
+                                const dateString = buildDateString(currentYear, currentMonth, day)
 
                                 const isToday =
                                     day === today.getDate() &&
                                     currentMonth === today.getMonth() &&
                                     currentYear === today.getFullYear()
 
-                                const dayEvents = events.filter((event) => {
-                                    const eventDate = event.event_date
-                                    const eventDateString = `${eventDate.getFullYear()}-${String(
-                                        eventDate.getMonth() + 1
-                                        ).padStart(2, "0")}-${String(eventDate.getDate()).padStart(2, "0")}`
+                                const dayEvents = events.filter(
+                                    (event) => formatDateForComparison(event.event_date) === dateString
+                                )
 
-                                        return eventDateString === dateString
-                                    })
-                        
-                            const visibleEvents = dayEvents.slice(0, 2)
-
-                            const gridIndex = index + startOffset
-                            const isSaturday = gridIndex % 7 === 5
-                            const isSunday = gridIndex % 7 === 6
-                            const isWeekend = isSaturday || isSunday
-                            const isWeekday = !isWeekend
+                                const visibleEvents = dayEvents.slice(0, 2)
+                                const gridIndex = index + startOffset
+                                const isSaturday = gridIndex % 7 === 5
+                                const isSunday = gridIndex % 7 === 6
+                                const isWeekend = isSaturday || isSunday
+                                const isWeekday = !isWeekend
 
                                 return (
                                     <Link 
@@ -145,7 +122,6 @@ export default async function Scheduler({ searchParams }) {
                                         className={`calendar-day ${isToday ? "today" : ""} ${isWeekday ? "weekday" : ""} ${isSaturday ? "saturday" : ""} ${isSunday ? "sunday" : ""}`}
                                     >
                                         <strong>{day}</strong>
-
                                         <div className="calendar-events-text">
                                             {visibleEvents.map((event) => {
                                                 const start = event.start_time
@@ -174,7 +150,7 @@ export default async function Scheduler({ searchParams }) {
 
                                         <div className="calendar-events-dots">
                                             {visibleEvents.map((event) => (
-                                                <span key={event.id} className="event-dot"></span>
+                                                <span key={event.id}className="event-dot"></span>
                                             ))}
                                         </div>
 

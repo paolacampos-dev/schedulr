@@ -10,7 +10,7 @@ export default async function NewEvent({ searchParams})  {
 
     async function handleSubmit(rawFormData)    {
         "use server"   
-        const { event_date, title, start_time, end_time, description} =  Object.fromEntries(rawFormData)
+        const { event_date, title, start_time, end_time, description } =  Object.fromEntries(rawFormData)
 
         const eventDate = event_date || null
         const startTime = start_time || null
@@ -30,7 +30,7 @@ export default async function NewEvent({ searchParams})  {
         <EventForm
             action={handleSubmit}
             initialDate= {initialDate}
-        />
+                    />
     )
 }
 

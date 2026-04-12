@@ -2,7 +2,7 @@ import { db } from "@/utils/dbConnection"
 import Link from "next/link";
 import EventCard from "@/components/EventCard";
 
-export default async function DatePage({ params }) {
+export default async function DatePage ({ params }) {
 
     /*const resolvedParams = await params
     const date = resolvedParams.date */
@@ -14,7 +14,6 @@ export default async function DatePage({ params }) {
         `
         SELECT *
         FROM calendar_events
-
         WHERE event_date =$1
         ORDER BY start_time ASC
         `, 
@@ -33,9 +32,15 @@ export default async function DatePage({ params }) {
             </Link>
         </div>
     ) : (
-        events.map((event)=>    (
-            <EventCard key={event.id} event={event} />
-        ))
+        <div className="page-container">
+            <div className="events-card">
+                <div className="events-list">
+                    {events.map((event) => (
+                        <EventCard key={event.id} event={event} />
+                    ))}
+                </div>
+            </div>
+        </div>
     )}
     </>
     )

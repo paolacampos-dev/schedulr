@@ -1,5 +1,8 @@
 "use client"
 
+import { formatDateForInput } from "@/utils/dateHelpers"
+import { formatTimeForInput } from "@/utils/timeHelpers"
+
 export default function EventForm({ action, event, initialDate })    {
     
     return (
@@ -19,7 +22,7 @@ export default function EventForm({ action, event, initialDate })    {
                                     id="event_date"
                                     type="date"
                                     name="event_date"
-                                    defaultValue={event?.event_date || initialDate || ""}
+                                    defaultValue={event?.event_date ? formatDateForInput(event.event_date) : initialDate || ""}
                                     required
                                     className="form-input"
                                 />
@@ -48,7 +51,7 @@ export default function EventForm({ action, event, initialDate })    {
                                                     id="start_time"
                                                     type="time"
                                                     name="start_time"
-                                                    defaultValue={event?.start_time || ""}
+                                                    defaultValue={formatTimeForInput(event?.start_time) || ""}
                                                     className="form-input"
                                                 />
                                             </div>
@@ -58,7 +61,7 @@ export default function EventForm({ action, event, initialDate })    {
                                                     id="end_time"
                                                     type="time"
                                                     name="end_time"
-                                                    defaultValue={event?.end_time || ""}
+                                                    defaultValue={formatTimeForInput(event?.end_time) || ""}
                                                     className="form-input"
                                                 />
                                             </div>   
