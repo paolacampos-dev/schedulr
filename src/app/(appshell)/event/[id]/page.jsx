@@ -2,6 +2,7 @@ import { db } from "@/utils/dbConnection";
 import EventCard from "@/components/EventCard";
 import Link from "next/link";
 import deleteEvent from "@/actions/deleteEvent";
+import PageWrapper from "@/components/PageWrapper";
 
 
 export default async function Eventpage ({ params })    {
@@ -22,20 +23,19 @@ export default async function Eventpage ({ params })    {
     }
 
     return  (
-        <div className="page-container">
-            <div className="events-card">
+        <>
+            <PageWrapper>
                 <EventCard event={event} />
-                    <div className="actions">
-                        <Link href={`/event/${event.id}/edit`}>Edit</Link>
+                    <div className="actions-btns">
+                        <Link href={`/event/${event.id}/edit`} className="new-button">Edit</Link>
                             <form action={deleteEvent}>
                                 <input type="hidden" name="id" value={event.id}/>
                                 <input type="hidden" name="date" value={event.event_date}/>
-                    
-                                <button type="submit">Delete</button>
+                                <button type="submit" className="new-button delete-button">Delete</button>
                             </form>
                     </div>
-            </div>
-        </div>
+            </PageWrapper>
+        </>
     )
 }
 

@@ -419,3 +419,31 @@ h1 {
   font-weight: 500;
   margin-top: 0.2rem;
 }
+
+.actions-btns {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  padding: 0 0.25rem;
+}
+
+.actions-btns .new-button {
+  margin: 0;
+  min-width: 5.5rem;
+}
+
+.actions-btns a,
+.actions-btns form {
+  display: block;
+}
+
+.actions-btns button,
+.actions-btns a {
+  min-width: 5rem;
+  text-align: center;
+}
+
+.delete-button {
+  background: #440303;
+}
