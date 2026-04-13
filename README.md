@@ -1,5 +1,6 @@
 **Schedulr**
 “A scalable scheduling engine built with Next.js, designed for automation and AI-driven workflows.”
+A simple scheduling tool to organise events and visualise time clearly with a monthly calendar and quick event management.
 
 ## events can be add trough a new event or thourgh choosing the date in the calendar, both routes brings you to the same form to create the new event
 

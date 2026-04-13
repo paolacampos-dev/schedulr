@@ -19,12 +19,12 @@ export default async function Editpage({ params })   {
 
     return (
         <>
-                <div className="events-card">
-                    <EventForm 
-                        action={UpdateEvent} 
-                        event={event} 
-                        initialDate= {initialDate}/>
-                </div>
+            <div className="events-card">
+                <EventForm 
+                    action={UpdateEvent} 
+                    event={event} 
+                    initialDate= {initialDate}/>
+            </div>
         </>
     )
 }

@@ -1,11 +1,13 @@
 import { db } from "@/utils/dbConnection";
 import Link from "next/link";
-import { buildDateString, formatDateForComparison, formatDateForDisplay } from "@/utils/dateHelpers";
+import { buildDateString, formatDateForComparison } from "@/utils/dateHelpers";
 import EventCard from "@/components/EventCard";
+import { formatTimeRange } from "@/utils/timeHelpers";
 
+const weekDays = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
+const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]
 
 export default async function Scheduler({ searchParams }) {
-
     const today = new Date()
     const params = await searchParams
     const view = params?.view || "month";
@@ -14,6 +16,7 @@ export default async function Scheduler({ searchParams }) {
     
     let currentMonth = month
     let currentYear = year
+
     if (currentMonth < 0) {
         currentMonth = 11
         currentYear -= 1
@@ -28,9 +31,7 @@ export default async function Scheduler({ searchParams }) {
     const startOffset = firstDayOfMonth === 0 ? 6 : firstDayOfMonth - 1
     const days = Array.from({ length: daysInMonth }, (_, i) => i + 1)
     const emptyDays = Array.from({ length: startOffset })
-    const weekDays = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
-    const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]
-
+    
     const eventsResult = await db.query(
         `
         SELECT *
@@ -124,23 +125,11 @@ export default async function Scheduler({ searchParams }) {
                                         <strong>{day}</strong>
                                         <div className="calendar-events-text">
                                             {visibleEvents.map((event) => {
-                                                const start = event.start_time
-                                                    ? String(event.start_time).slice(0, 5)
-                                                    : ""
-
-                                                const end = event.end_time
-                                                    ? String(event.end_time).slice(0, 5)
-                                                    : ""
-
-                                                const timeRange =
-                                                    start && end
-                                                    ? `${start}-${end}`
-                                                    : start || ""
-
+                                                const time = formatTimeRange(event.start_time, event.end_time)
                                                 return (
                                                     <p key={event.id} className="calendar-event">
-                                                        {timeRange && (
-                                                            <span className="event-time">{timeRange}</span>
+                                                        {time && (
+                                                            <span className="event-time">{time}</span>
                                                         )}{" "}
                                                         {event.title}
                                                     </p>
